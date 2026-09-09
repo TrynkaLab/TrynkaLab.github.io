@@ -14,12 +14,12 @@ export default defineConfig({
     search: false,
     nav: [
       { text: 'About us', link: 'https://www.sanger.ac.uk/group/trynka-group/' },
-      { text: 'Publications', link: '/publications/' },
+      { text: 'Publications', link: `${siteBase}/publications/` },
       {
         text: 'Software',
         items: [
-          { text: 'sc-blipper', link: '/software/sc-blipper/' },
-          { text: 'tglow', link: '/software/tglow/' },
+          { text: 'sc-blipper', link: `${siteBase}/software/sc-blipper/` },
+          { text: 'tglow', link: `${siteBase}/software/tglow/` },
         ],
       },
     ],
