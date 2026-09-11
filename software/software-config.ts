@@ -1,6 +1,6 @@
 import { defineConfig } from '@rspress/core';
 
-type SoftwareSlug = 'sc-blipper' | 'tglow';
+type SoftwareSlug = 'sc-blipper' | 'tglow-pipeline';
 
 const software = {
   'sc-blipper': {
