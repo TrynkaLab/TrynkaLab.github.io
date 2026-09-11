@@ -19,7 +19,7 @@ export default defineConfig({
         text: 'Software',
         items: [
           { text: 'sc-blipper', link: `${siteBase}/software/sc-blipper/` },
-          { text: 'tglow', link: `${siteBase}/software/tglow/` },
+          { text: 'tglow-pipeline', link: `${siteBase}/software/tglow-pipeline/` },
         ],
       },
     ],
