@@ -14,7 +14,11 @@ change React components, configuration, or build scripts.
 | Publications | One file per paper in `publications/` |
 | Software overview | `docs/software/index.md` |
 | sc-blipper documentation | `software/sc-blipper/docs/v0.0.4-alpha/` |
-| TGlow documentation | `software/tglow/docs/v0.0.1-beta/` |
+| tglow-pipeline documentation | `software/tglow-pipeline/docs/v0.0.1-beta/` |
+| tglow-r documentation | `software/tglow-r/docs/v0.1.22/` |
+| tglow-core documentation | `software/tglow-core/docs/v0.1.4/` |
+| edit-quant documentation | `software/edit-quant/docs/v0.0.1/` |
+| ProliferationAnalysis documentation | `software/proliferation-analysis/docs/v0.1.3/` |
 
 The homepage banner and research placeholders are currently part of the site
 layout. Ask a maintainer to change those rather than editing files under
@@ -44,7 +48,7 @@ folder. Existing filenames map directly to website pages, for example:
 
 ```text
 software/sc-blipper/docs/v0.0.4-alpha/installation.md
-software/tglow/docs/v0.0.1-beta/running.md
+software/tglow-pipeline/docs/v0.0.1-beta/running.md
 ```
 
 ### Add a software documentation page
@@ -174,7 +178,11 @@ automatically and receive the repository-name path prefix.
 ├── software/
 │   ├── software-config.ts        # Tool metadata and version registry
 │   ├── sc-blipper/docs/          # Versioned sc-blipper Markdown
-│   └── tglow/docs/               # Versioned TGlow Markdown
+│   ├── tglow-pipeline/docs/      # Versioned tglow-pipeline Markdown
+│   ├── tglow-r/docs/             # Versioned tglow-r Markdown
+│   ├── tglow-core/docs/          # Versioned tglow-core Markdown
+│   ├── edit-quant/docs/          # Versioned edit-quant Markdown
+│   └── proliferation-analysis/docs/ # Versioned ProliferationAnalysis Markdown
 ├── theme/                        # React layout and styles
 ├── scripts/                      # Content build helpers
 ├── rspress.config.ts             # Main portal configuration

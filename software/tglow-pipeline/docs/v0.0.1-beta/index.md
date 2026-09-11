@@ -1,6 +1,6 @@
 ---
 title: Trynka Lab
-titleSuffix: '| tglow'
+titleSuffix: '| tglow-pipeline'
 ---
 
 # Introduction

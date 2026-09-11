@@ -5,11 +5,15 @@
   "type": "module",
   "scripts": {
     "prebuild": "npm run build:publications",
-    "build": "npm run build:portal && npm run build:sc-blipper && npm run build:tglow",
+    "build": "npm run build:portal && npm run build:sc-blipper && npm run build:tglow-pipeline && npm run build:tglow-r && npm run build:tglow-core && npm run build:edit-quant && npm run build:proliferation-analysis",
     "build:publications": "node scripts/build-publications.mjs",
     "build:portal": "rspress build",
     "build:sc-blipper": "rspress build -c software/sc-blipper/rspress.config.ts",
-    "build:tglow": "rspress build -c software/tglow/rspress.config.ts",
+    "build:tglow-pipeline": "rspress build -c software/tglow-pipeline/rspress.config.ts",
+    "build:tglow-r": "rspress build -c software/tglow-r/rspress.config.ts",
+    "build:tglow-core": "rspress build -c software/tglow-core/rspress.config.ts",
+    "build:edit-quant": "rspress build -c software/edit-quant/rspress.config.ts",
+    "build:proliferation-analysis": "rspress build -c software/proliferation-analysis/rspress.config.ts",
     "predev": "npm run build:publications",
     "dev": "rspress dev",
     "preview": "rspress preview"

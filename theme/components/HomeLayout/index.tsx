@@ -1,26 +1,35 @@
+import { useSite } from '@rspress/core/runtime';
 import { HorizontalScroller } from '../HorizontalScroller';
 import { SiteFooter } from '../SiteFooter';
 import './index.css';
 
 const researchItems = [
   {
-    title: 'Research area one',
+    title: 'Single-cell eQTL mapping in dynamic immune states',
     description:
-      'Add a short description of this research area, including the question, approach, and expected impact.',
+      'We map context-specific genetic effects on gene regulation in resting and stimulated immune cells, including work through Project JAGUAR to study immune gene regulation across Latin American populations and address representation gaps in genomic data.',
+    image: 'images/jaguar-project.jpg',
+    imageAlt: 'Project JAGUAR artwork',
   },
   {
-    title: 'Research area two',
+    title: 'CRISPR perturbation of immune disease-associated genes',
     description:
-      'Use this space to introduce another research direction and explain why it matters in a few concise sentences.',
+      'Pooled and arrayed CRISPR screens in primary immune cells let us define the causal gene functions that underlie immune-mediated diseases.',
+    image: 'images/crispr-cas9.jpg',
+    imageAlt: 'Illustration of CRISPR-Cas9 gene editing',
   },
   {
-    title: 'Research area three',
+    title: 'High-content imaging of cellular phenotypes',
     description:
-      'Summarize the focus of this research area here. Supporting publications and project links can be added later.',
+      'High-throughput imaging quantifies morphological and functional features at the single-cell level, which we integrate with transcriptomic data to connect cell phenotype to gene regulation.',
+    image: 'images/jurkat-b2.jpg',
+    imageAlt: 'High-content microscopy image of Jurkat cells',
   },
 ];
 
 export function HomeLayout() {
+  const { site } = useSite();
+
   return (
     <>
       <main className="home-layout">
@@ -48,11 +57,8 @@ export function HomeLayout() {
                   className={`research-item research-item--image-${imagePosition}`}
                   key={item.title}
                 >
-                  <div
-                    className="card research-item__image"
-                    aria-label={`${item.title} image placeholder`}
-                  >
-                    <span>Image placeholder</span>
+                  <div className="card research-item__image">
+                    <img src={`${site.base}${item.image}`} alt={item.imageAlt} />
                   </div>
 
                   <div className="research-item__content">
