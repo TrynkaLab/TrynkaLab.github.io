@@ -9,8 +9,8 @@ const software = {
     repository: 'https://github.com/TrynkaLab/sc-blipper',
     currentVersion: 'v0.0.4-alpha',
   },
-  tglow: {
-    title: 'tglow',
+  'tglow-pipeline': {
+    title: 'tglow-pipeline',
     description: 'High-content imaging workflows',
     repository: 'https://github.com/TrynkaLab/tglow-pipeline',
     currentVersion: 'v0.0.1-beta',

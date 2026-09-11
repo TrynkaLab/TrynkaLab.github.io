@@ -1,3 +1,3 @@
 import { defineSoftwareConfig } from '../software-config';
 
-export default defineSoftwareConfig('tglow');
+export default defineSoftwareConfig('tglow-pipeline');
