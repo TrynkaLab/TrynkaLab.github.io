@@ -4,10 +4,9 @@ Scaling puts each channel's intensities on a common scale before features are
 extracted. It serves two purposes:
 
 1. **Use the 16-bit range well.** Processed images are stored as 16-bit
-   integers (0 to 65535). Flatfield correction, deconvolution and
-   registration change the intensity range, so a channel can end up using only
-   a small part of the range (losing precision) or exceed it (clipping).
-   Scaling stretches or compresses each channel so its signal fills the range.
+   integers (0 to 65535). A channel can end up using only a small part of the range 
+   if the stain intensity is low (<3000 for instance).
+   Scaling stretches or compresses each channel so its signal fills the range most optimally for the data.
 2. **Remove plate effects.** Staining and imaging vary between plates. Using
    control wells that should look the same on every plate, scaling estimates a
    per-plate offset and corrects for it, so intensities can be compared across
@@ -22,14 +21,32 @@ crops, so all downstream features use the scaled images.
 
 ## Choosing a mode
 
-| Mode | Set | What happens |
-|---|---|---|
-| No scaling | neither `sc_autoscale` nor `sc_manualscale` (default) | Images keep their intensities after finalize. Intensity measurements and the QC report still run. |
-| Automatic | `sc_autoscale = true` | Scaling factors are estimated from the measured intensities of this run. Recommended. |
-| Manual | `sc_manualscale = <file>` | You supply the scaling factors, and optionally the sigmoid, as text files. |
+| Mode | What it corrects | Parameters | Channel map |
+|---|---|---|---|
+| No scaling (default) | Nothing. Images keep their intensities after finalize. | neither `sc_autoscale` nor `sc_manualscale` | not used for scaling |
+| Dynamic range only | Fills the 16-bit range per channel; no correction between plates. | `sc_autoscale = true` | optional. Without one, every channel uses `sc_autoscale_q1` (default `max`). |
+| Plate offsets only | Equalises the control wells between plates, without changing the overall range. | `sc_autoscale = true`, `sc_channel_map`, `sc_control_list` | leave `dynamic_range_feature` blank, set `plate_offset_feature` |
+| Full (dynamic range and plate offsets) | Both. Recommended. | `sc_autoscale = true`, `sc_channel_map`, `sc_control_list` | set both `dynamic_range_feature` and `plate_offset_feature` |
+| Manual | Whatever factors you supply. | `sc_manualscale = <file>`, optionally `sc_scale_slope` and `sc_scale_bias` | not used for scaling |
 
-`sc_autoscale` takes precedence over `sc_manualscale` if both are set (with a
-warning). Automatic scaling needs `rn_cache_images = true`.
+Notes:
+
+- **Sigmoid.** In the automatic modes, the sigmoid soft threshold is fitted on
+  the control wells, so it needs a control list and the `sigmoid_*_feature`
+  columns in the channel map. Without a control list (dynamic range only),
+  factors are applied uniformly to all pixels. You can switch the sigmoid off
+  with `sc_skip_sigmoid = true`, or per channel, in any mode.
+- **Per channel.** The mode can differ per channel: leave a feature blank, or
+  use the `skip_scaling`, `skip_plate_offsets` and `skip_sigmoid` columns of the
+  channel map (see [Per-channel opt-outs](#per-channel-opt-outs)). Channels
+  without a row in the channel map are not scaled.
+- **Plate offsets only.** With a blank `dynamic_range_feature`, a channel's
+  dynamic range counts as 1. Its factor is then the plate offset itself: the
+  dimmest plate is left unchanged and brighter plates are divided down to
+  match it.
+- `sc_autoscale` takes precedence over `sc_manualscale` if both are set (with
+  a warning). `sc_control_list` without `sc_autoscale = true` is an error.
+- Automatic scaling needs `rn_cache_images = true`.
 
 ## How automatic scaling works
 
@@ -99,18 +116,46 @@ all plate offsets are 1 and only the dynamic range is scaled.
 
 ### The scaling factor
 
-The pipeline divides each plate's dynamic range by its offset, and takes the
-largest value over all plates as the channel's `base_scale`. The factor for
-each plate is then:
+The factor combines the dynamic range and the plate offsets. For each channel:
 
 ```text
-scale_factor = base_scale × plate_offset
+max_scale_plate_norm = max_scale_plate / plate_offset      (per plate)
+base_scale           = max(max_scale_plate_norm)           (over all plates)
+scale_factor         = base_scale × plate_offset           (per plate)
 ```
 
-Dividing a plate's pixels by this factor corrects the plate offset (all
-plates' controls end up at the same level) and uses the same scale for every
-plate. That scale is set so that the plate needing the most compression still
-fits in the 16-bit range.
+`max_scale_plate_norm` is the dynamic range a plate would have if its plate
+offset were removed, i.e. expressed at the brightness of the dimmest plate.
+`base_scale` is the largest of these over all plates: the scale needed so that
+the plate that is brightest after offset correction still fits in the 16-bit
+range. Every plate is then divided by the same `base_scale`, times its own
+offset.
+
+Dividing a plate's pixels by its factor therefore does two things: it
+removes the plate offset (all plates' controls end up at the same level), and
+it applies one common scale, so that the most demanding plate reaches
+`sc_uint_max` at its `sc_autoscale_q2` quantile and no plate clips there.
+
+For example, with `sc_uint_max = 65535` and two plates:
+
+| | Plate A | Plate B |
+|---|---|---|
+| 95th percentile of `max` | 32768 | 98304 |
+| `max_scale_plate` | 0.5 | 1.5 |
+| `plate_offset` | 1.0 | 1.2 |
+| `max_scale_plate_norm` | 0.5 | 1.25 |
+| `base_scale` | 1.25 | 1.25 |
+| `scale_factor` | 1.25 | 1.5 |
+| 95th percentile after scaling | 26214 | 65535 |
+
+Plate B sets `base_scale`. Its controls were 1.2 times brighter than plate
+A's, and after dividing by 1.5 and 1.25 respectively they are at the same
+level (1.2 / 1.5 = 1 / 1.25). Plate A doesn't fill the range, because its
+cells are genuinely dimmer once the plate offset is accounted for.
+
+`base_scale` and every intermediate value are in `scaling_index.tsv` (see
+[Output](#output)). When scaling across batches, `base_scale` is recalculated
+over the plates of all batches, see [Scaling across batches](#scaling-across-batches).
 
 ### Sigmoid soft threshold
 

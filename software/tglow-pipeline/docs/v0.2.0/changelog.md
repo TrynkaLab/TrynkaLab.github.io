@@ -4,8 +4,6 @@
 
 ### Major changes
 
-> Scaling currently only works with 2 cycles.
-
 #### General changes
 - Reworked the scaling workflow, which should now be broadly automated rather than relying on two pipeline runs
 - Added cross-batch scaling consensus (`sc_reference_scaling_index`). Given one or more previous batches' `scaling_index.tsv`, a new `consensus_scaling_factors` step pools them with the current batch's own index and recomputes the scaling factors over the combined plate set, so the output dynamic range is comparable between batches. The recompute reproduces exactly what a single run over all the pooled plates would have produced, rather than averaging the per-batch factors (which is not meaningful - each batch's `base_scale` carries its own plate-offset anchor). Outputs go to `rr__scaling/consensus` and supersede those in `rr__scaling`, and a `consensus_diagnostics.tsv` reports the per-plate values behind the pooled scale.

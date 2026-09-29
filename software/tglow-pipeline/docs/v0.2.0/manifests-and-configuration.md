@@ -50,7 +50,7 @@ file must have exactly these columns (in any order):
 | `index_xml` | path | Path to the Revity/PerkinElmer `Index.xml` (or `Index.idx.xml`) of the plate. Used by staging and by `ff_mode = "PE"`. |
 | `ff_channels` | comma-separated channels, or `none` | Channels to estimate flatfields for. `none` skips flatfield estimation for the plate. |
 | `cp_nucl_channel` | channel or `none` | Nucleus channel for Cellpose. `none` runs Cellpose without a nucleus channel. |
-| `cp_cell_channel` | channel or `none` | Whole-cell channel for Cellpose. `none` skips segmentation for the plate. |
+| `cp_cell_channel` | channel or `none` | Whole-cell channel for Cellpose. `none` skips segmentation for the plate, which excludes it from all mask-dependent steps (finalize, measurement, scaling, CellProfiler, cellcrops, QC). For registration query plates this is expected, since they are processed through their reference plate. |
 | `dc_psfs` | `<channel>=<path>` pairs, comma-separated, or `none` | Point spread function per channel to deconvolve, for example `0=psfs/psf_375.tif,3=psfs/psf_640.tif`. Only listed channels are deconvolved. |
 | `mask_channels` | comma-separated channels, or `none` | Channels to split into a nuclear (inclusive) and non-nuclear (exclusive) signal using the masks. Requires `rn_hybrid = true`, see [Understanding output](understanding-output.md#processed-images). |
 
