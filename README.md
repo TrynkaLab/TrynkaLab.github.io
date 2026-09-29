@@ -14,7 +14,7 @@ change React components, configuration, or build scripts.
 | Publications | One file per paper in `publications/` |
 | Software overview | `docs/software/index.md` |
 | sc-blipper documentation | `software/sc-blipper/docs/v0.0.4-alpha/` |
-| tglow-pipeline documentation | `software/tglow-pipeline/docs/v0.0.1-beta/` |
+| tglow-pipeline documentation | `software/tglow-pipeline/docs/v0.2.0/` |
 | tglow-r documentation | `software/tglow-r/docs/v0.1.22/` |
 | tglow-core documentation | `software/tglow-core/docs/v0.1.4/` |
 | edit-quant documentation | `software/edit-quant/docs/v0.0.1/` |
@@ -48,7 +48,7 @@ folder. Existing filenames map directly to website pages, for example:
 
 ```text
 software/sc-blipper/docs/v0.0.4-alpha/installation.md
-software/tglow-pipeline/docs/v0.0.1-beta/running.md
+software/tglow-pipeline/docs/v0.2.0/running.md
 ```
 
 ### Add a software documentation page

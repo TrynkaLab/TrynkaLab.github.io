@@ -1,0 +1,6 @@
+[
+  { "type": "file", "name": "index", "label": "Home" },
+  { "type": "file", "name": "api-reference", "label": "API reference" },
+  { "type": "file", "name": "changelog", "label": "Changelog" },
+  { "type": "file", "name": "source", "label": "Source snapshot" }
+]

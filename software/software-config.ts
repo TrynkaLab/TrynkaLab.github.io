@@ -8,7 +8,16 @@ type SoftwareSlug =
   | 'edit-quant'
   | 'proliferation-analysis';
 
-const software = {
+type SoftwarePackage = {
+  title: string;
+  description: string;
+  repository: string;
+  currentVersion: string;
+  /** All published documentation versions; defaults to [currentVersion]. */
+  versions?: string[];
+};
+
+const software: Record<SoftwareSlug, SoftwarePackage> = {
   'sc-blipper': {
     title: 'sc-blipper',
     description: 'Single-cell analysis workflows',
@@ -19,7 +28,8 @@ const software = {
     title: 'tglow-pipeline',
     description: 'High-content imaging workflows',
     repository: 'https://github.com/TrynkaLab/tglow-pipeline',
-    currentVersion: 'v0.0.1-beta',
+    currentVersion: 'v0.2.0',
+    versions: ['v0.2.0', 'v0.0.1-beta'],
   },
   'tglow-r': {
     title: 'tglow-r',
@@ -32,6 +42,7 @@ const software = {
     description: 'Core Python library for TGlow image processing',
     repository: 'https://github.com/TrynkaLab/tglow-core',
     currentVersion: 'v0.1.4',
+    versions: ['v0.2.0', 'v0.1.4'],
   },
   'edit-quant': {
     title: 'edit-quant',
@@ -45,7 +56,7 @@ const software = {
     repository: 'https://github.com/TrynkaLab/ProliferationAnalysis',
     currentVersion: 'v0.1.3',
   },
-} as const;
+};
 
 export function defineSoftwareConfig(slug: SoftwareSlug) {
   const softwarePackage = software[slug];
@@ -60,7 +71,7 @@ export function defineSoftwareConfig(slug: SoftwareSlug) {
     description: softwarePackage.description,
     multiVersion: {
       default: softwarePackage.currentVersion,
-      versions: [softwarePackage.currentVersion],
+      versions: softwarePackage.versions ?? [softwarePackage.currentVersion],
     },
     themeConfig: {
       darkMode: 'light',
