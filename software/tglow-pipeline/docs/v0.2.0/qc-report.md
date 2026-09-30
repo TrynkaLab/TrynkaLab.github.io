@@ -69,7 +69,8 @@ data, or set with `qc_plate_format` (`24`, `96`, `384` or `1536`).
 ### Tab 2: Registration
 
 How well the cycles align. For every cell, the pipeline calculates the
-correlation between the nucleus stains of the reference and query cycles.
+correlation between the registration channels of the reference and query cycles
+(`reference_channel` and `query_channels` in the registration manifest).
 A cell counts as registered when every correlation column is at least
 `sc_registration_thresh` (default 0.4). The same filter selects the cells used
 for scaling.

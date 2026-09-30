@@ -4,6 +4,7 @@
   {"type": "file", "name": "manifests-and-configuration", "label": "Manifests and configuration"},
   {"type": "file", "name": "staging-data", "label": "Staging data"},
   {"type": "file", "name": "running", "label": "Running"},
+  {"type": "file", "name": "configuring-cellprofiler", "label": "Configuring CellProfiler"},
   {"type": "file", "name": "scaling", "label": "Scaling"},
   {"type": "file", "name": "qc-report", "label": "QC report"},
   {"type": "file", "name": "understanding-output", "label": "Understanding output"},

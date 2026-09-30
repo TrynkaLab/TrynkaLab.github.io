@@ -241,7 +241,7 @@ registered well can still be used.
 ![2_250310_180703-V_refch2_qrych2.png](./images/2_250310_180703-V_refch2_qrych2.png)
 
 Because individual cells can move between cycles, the pipeline also
-measures the correlation of the nucleus stains within each cell
+measures the correlation of the registration channels within each cell
 (`ch<ref>_ch<query>__registration_corr` in the measurements, one column per
 query cycle). Cells below
 `sc_registration_thresh` are excluded from scaling, and the QC report shows
@@ -318,10 +318,9 @@ CellProfiler as one TIFF per field and channel:
 
 where `<plate>` is the reference plate, `<well>` is written like `A01`, and
 `<channel>` is the final, 0-indexed channel number. The masks are in the same
-folder, with the names from [Segmentation](#segmentation). Set up the
-NamesAndTypes module of your CellProfiler pipeline to match this pattern. For
-the per-plate aggregation, name the main object `cell` and export every
-object as a separate file.
+folder, with the names from [Segmentation](#segmentation). See
+[Configuring CellProfiler](configuring-cellprofiler.md) for how to set up the
+input modules and the export of your CellProfiler pipeline.
 
 Output, in `rr__features/cellprofiler/`:
 

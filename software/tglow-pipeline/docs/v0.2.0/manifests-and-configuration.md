@@ -65,9 +65,10 @@ P2	/path/to/P2_Index.xml	0	0	1	0=/path/to/psf_dapi.tif	none
 Notes:
 
 - When a registration manifest is given, only the reference plates are
-  segmented. The Cellpose columns of later cycles are ignored, but setting
-  `cp_nucl_channel` on every plate is still useful: it tells the pipeline
-  which channel to use for the per-cell registration correlation.
+  segmented, and the Cellpose columns of later cycles are ignored. The
+  channels used for the per-cell registration correlation come from the
+  registration manifest (`reference_channel` and `query_channels`), not from
+  `cp_nucl_channel`.
 - Segmentation masks are required for everything after deconvolution.
   `cp_run = false` is only allowed when `rn_cache_images` and `cpr_run`
   are both switched off as well.
@@ -81,9 +82,9 @@ channels of each later cycle after those of the reference plate.
 | Column | Format | Purpose |
 |---|---|---|
 | `reference_plate` | plate name | The reference (cycle 1) plate. |
-| `reference_channel` | channel | Channel on the reference plate used for alignment, usually the nucleus stain. |
+| `reference_channel` | channel | Channel on the reference plate used for alignment, usually the nucleus stain. Also used for the per-cell registration correlation. |
 | `query_plates` | comma-separated plate names | Later cycles, in cycle order (cycle 2, 3, ...). |
-| `query_channels` | comma-separated channels | Alignment channel for each query plate, in the same order. |
+| `query_channels` | comma-separated channels | Alignment channel for each query plate, in the same order. Also used for the per-cell registration correlation. |
 
 The header must be exactly these four column names.
 

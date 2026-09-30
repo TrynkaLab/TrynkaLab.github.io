@@ -23,11 +23,11 @@ crops, so all downstream features use the scaled images.
 
 | Mode | What it corrects | Parameters | Channel map |
 |---|---|---|---|
-| No scaling (default) | Nothing. Images keep their intensities after finalize. | neither `sc_autoscale` nor `sc_manualscale` | not used for scaling |
+| No scaling (default) | Nothing. Images keep their intensities after finalize. | `sc_autoscale = false`, `sc_manualscale = null` | not used for scaling |
 | Dynamic range only | Fills the 16-bit range per channel; no correction between plates. | `sc_autoscale = true` | optional. Without one, every channel uses `sc_autoscale_q1` (default `max`). |
-| Plate offsets only | Equalises the control wells between plates, without changing the overall range. | `sc_autoscale = true`, `sc_channel_map`, `sc_control_list` | leave `dynamic_range_feature` blank, set `plate_offset_feature` |
-| Full (dynamic range and plate offsets) | Both. Recommended. | `sc_autoscale = true`, `sc_channel_map`, `sc_control_list` | set both `dynamic_range_feature` and `plate_offset_feature` |
-| Manual | Whatever factors you supply. | `sc_manualscale = <file>`, optionally `sc_scale_slope` and `sc_scale_bias` | not used for scaling |
+| Plate offsets only | Equalises the control wells between plates, without changing the overall range. | `sc_autoscale = true`, `sc_channel_map = </path/to/channel_map.tsv>`, `sc_control_list = </path/to/control_list.tsv>` | leave `dynamic_range_feature` blank, set `plate_offset_feature` |
+| Full (dynamic range and plate offsets) | Both. Recommended. | `sc_autoscale = true`, `sc_channel_map = </path/to/channel_map.tsv>`, `sc_control_list = </path/to/control_list.tsv>` | set both `dynamic_range_feature` and `plate_offset_feature` |
+| Manual | Whatever factors you supply. | `sc_manualscale = </path/to/scaling_factors.txt>`, optionally `sc_scale_slope = </path/to/slope.txt>` and `sc_scale_bias = </path/to/bias.txt>` | not used for scaling |
 
 Notes:
 

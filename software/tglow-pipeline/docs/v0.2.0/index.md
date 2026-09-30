@@ -6,10 +6,17 @@ titleSuffix: '| tglow-pipeline'
 # Introduction
 
 `tglow-pipeline` is a Nextflow pipeline for processing high-content imaging (HCI)
-plates, from raw Revity/PerkinElmer (Opera Phenix, Operetta) exports to
-single-cell features. It handles flatfield correction, multi-cycle registration,
-deconvolution, Cellpose segmentation, intensity scaling, CellProfiler feature
-extraction, cell crops and an HTML QC report.
+plates, from raw Revity/PerkinElmer exports from the Opera Phenix or the
+Operetta to single-cell features. It also accepts any other OME-TIFFs organised
+in a `<plate>/<row>/<col>/<field>.ome.tiff` structure with CZYX channel order
+(see [Staging data](staging-data.md)).
+
+The pipeline handles flatfield correction, multi-cycle registration,
+deconvolution, Cellpose segmentation, channel demultiplexing, intensity scaling
+and CellProfiler-based feature extraction. It additionally outputs processed
+images that can be visualised in Napari or other viewers, cell crops that can be
+used for visualisation in R or for training deep learning models, and an HTML QC
+report.
 
 > Check out our preprint: [bioRxiv 2026.02.10.704860](https://www.biorxiv.org/content/10.64898/2026.02.10.704860v1)
 
@@ -25,12 +32,13 @@ The pipeline is one of three components:
 2. [Manifests and configuration](manifests-and-configuration.md)
 3. [Staging data](staging-data.md)
 4. [Running the pipeline](running.md)
-5. [Scaling](scaling.md)
-6. [QC report](qc-report.md)
-7. [Understanding output](understanding-output.md)
-8. [Cleaning up old runs](cleaning-data.md)
-9. [Finalizing results](finalizing-results.md)
-10. [Analysing features in R](analyzing-features-in-r.md)
+5. [Configuring CellProfiler](configuring-cellprofiler.md)
+6. [Scaling](scaling.md)
+7. [QC report](qc-report.md)
+8. [Understanding output](understanding-output.md)
+9. [Cleaning up old runs](cleaning-data.md)
+10. [Finalizing results](finalizing-results.md)
+11. [Analysing features in R](analyzing-features-in-r.md)
 
 Reference: [Parameters](parameters.md) · [FAQ](faq.md) · [Known issues](known-issues.md) · [Changelog](changelog.md)
 
