@@ -42,13 +42,15 @@ pipeline version.
 
 ## Tabs
 
-The report has up to seven tabs. General QC is always shown; the others
+The report has up to eight tabs. General QC is always shown, and Well QC
+whenever the per-well QC table was built (normally always); the others
 appear only when the step they describe ran. Each tab has a collapsible
 explanation, and a sidebar listing the parameters that were used.
 
 | Tab | Shown when |
 |---|---|
 | 1. General QC | Always. |
+| Well QC | The per-well QC table was built (normally always). Shown directly after General QC. |
 | 2. Registration | The measurements contain registration correlation columns, i.e. a registration manifest was used. |
 | 3. Flatfields | `ff_run = true`. |
 | 4. Deconvolution | `dc_run = true`. |
@@ -60,11 +62,21 @@ explanation, and a sidebar listing the parameters that were used.
 
 The overall size of the run: total cells, mean cells per well, and a table
 with the number of images, plates, wells, fields per well, blacklisted wells,
-images without any cells, and the number of cycles.
+images without any cells, and the number of cycles. It also lists the number
+of failed and warned wells from the [per-well QC table](#per-well-qc-table);
+the Well QC tab shows which wells they are.
 
 Below it is a heatmap of cells per well for each plate. Empty or
 blacklisted wells stand out as gaps. The plate layout is inferred from the
 data, or set with `qc_plate_format` (`24`, `96`, `384` or `1536`).
+
+### Well QC
+
+The [per-well QC table](#per-well-qc-table) as a sortable table, with the
+number of failed, warned, passed and blacklisted wells above it. Failed and
+warned wells are listed first, and a filter shows only the wells with a given
+verdict. The table in the report is for browsing; filter on `well_qc.tsv` in
+downstream analysis.
 
 ### Tab 2: Registration
 
@@ -165,21 +177,25 @@ scaling, see [Scaling](scaling.md#debris-aware-fitting).
 ## Per-well QC table
 
 `well_qc.tsv` has one row per well, with the value behind each check, the
-checks that failed and an overall verdict:
+checks that tripped at each level and an overall verdict:
 
 | Column | Meaning |
 |---|---|
-| `plate`, `row`, `col`, `well` | Well identifiers. |
-| `n_cells` | Number of segmented cells. Imaged wells without cells have `0`. |
-| `pct_registered` | Percentage of cells that pass `sc_registration_thresh` on every registration column. Empty for single-cycle runs. |
-| `pct_low_signal_ch<N>` | Per checked channel: percentage of cells with low signal (see below). |
-| `qc_flags` | The checks that tripped, separated by `;`, for example `n_cells<50;pct_low_signal_ch2>25`. Empty when all checks pass. |
+| `plate`, `row`, `col`, `well` | Well identifiers. Wells are listed under the reference plate of their registration group. |
+| `n_cells` | Number of segmented cells. Imaged wells without cells have `0`; wells that were never measured are empty. |
 | `qc_verdict` | `pass`, `warn`, `fail` or `blacklisted`. |
+| `qc_flags_fail` | The failing checks that tripped, separated by `;`, for example `missing_cycle:P2` or `n_cells<50;pct_registered<25`. Empty when no fail check tripped. |
+| `qc_flags_warn` | The warning checks that tripped, separated by `;`, for example `pct_low_ch2>25`. Empty when no warn check tripped. |
+| `missing_cycles` | The plates of the well's registration group it was not imaged in, separated by `,`. Empty when the well is present in every cycle. |
+| `pct_registered` | Percentage of cells that pass `sc_registration_thresh` on every registration column. Empty for single-cycle runs. |
+| `pct_low_ch<N>` | Per checked channel: percentage of cells with low signal (see below). |
 
 The checks:
 
 | Check | Consequence | Parameters |
 |---|---|---|
+| Missing cycle | fail when the well was not imaged in every plate of its registration group. Flagged as `missing_cycle:<plates>`. | `rn_manifest_registration` |
+| Not measured | fail when the well was set up to be processed in every cycle but has no measurements, for example because a task failed and its error was ignored. Flagged as `not_measured`. | |
 | Too few cells | fail when `n_cells` is below `qc_min_cells_per_well` (default 50) | `qc_min_cells_per_well` |
 | Poor registration | fail when `pct_registered` is below `qc_min_pct_registered` (default 25). Skipped when the run has no registration. | `qc_min_pct_registered`, `sc_registration_thresh` |
 | Low signal | warn when more than `qc_max_pct_low_signal` (default 25) percent of cells have low signal in any checked channel | `qc_signal_stat`, `qc_min_signal_ratio`, `qc_max_pct_low_signal`, `qc_intensity_skip_channels` |
@@ -195,10 +211,15 @@ where "above background" is not meaningful, such as brightfield, with
 `qc_intensity_skip_channels`, a comma-separated list of final (merged)
 channel numbers, for example `--qc_intensity_skip_channels 3,7`.
 
+A well that is missing from one of its cycles can't be registered, so the
+pipeline skips it at the start of the run, on every plate of its group, and
+logs a warning. The missing-cycle check makes these wells visible in the table
+rather than letting them disappear.
+
 The verdict is the worst outcome of all checks, in the order
 `blacklisted` > `fail` > `warn` > `pass`. Wells from the blacklist are added
-with the verdict `blacklisted` and no measurements, because they were excluded
-before anything was measured.
+with the verdict `blacklisted`, no measurements and no flags, because they were
+excluded before anything was measured.
 
 The table is meant as a starting point for filtering wells in downstream
 analysis. The pipeline itself does not drop wells based on it.

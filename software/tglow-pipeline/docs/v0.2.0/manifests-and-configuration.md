@@ -95,7 +95,12 @@ reference_plate	reference_channel	query_plates	query_channels
 P1	0	P2	0
 ```
 
-Wells need to be present in every cycle of a group to be registered.
+Wells need to be present in every cycle of a group to be registered. A well
+that is missing from one of the group's plates is skipped for every plate in
+the group, with a warning in the Nextflow log, and is reported as failed
+(`missing_cycle:<plates>`) in the [QC report's](qc-report.md#per-well-qc-table)
+`well_qc.tsv`. If this leaves a group with no wells at all, the group is
+ignored with a warning and the rest of the run continues.
 
 ### Final channel numbers
 
