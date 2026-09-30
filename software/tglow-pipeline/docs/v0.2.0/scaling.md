@@ -5,7 +5,7 @@ extracted. It serves two purposes:
 
 1. **Use the 16-bit range well.** Processed images are stored as 16-bit
    integers (0 to 65535). A channel can end up using only a small part of the range 
-   if the stain intensity is low (<3000 for instance).
+   if the stain intensity is low (&lt;3000 for instance).
    Scaling stretches or compresses each channel so its signal fills the range most optimally for the data.
 2. **Remove plate effects.** Staining and imaging vary between plates. Using
    control wells that should look the same on every plate, scaling estimates a

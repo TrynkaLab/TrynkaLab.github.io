@@ -28,7 +28,9 @@ The pipeline is one of three components:
 5. [Scaling](scaling.md)
 6. [QC report](qc-report.md)
 7. [Understanding output](understanding-output.md)
-8. [Analysing features in R](analyzing-features-in-r.md)
+8. [Cleaning up old runs](cleaning-data.md)
+9. [Finalizing results](finalizing-results.md)
+10. [Analysing features in R](analyzing-features-in-r.md)
 
 Reference: [Parameters](parameters.md) · [FAQ](faq.md) · [Known issues](known-issues.md) · [Changelog](changelog.md)
 

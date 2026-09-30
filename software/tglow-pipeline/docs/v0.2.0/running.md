@@ -197,8 +197,10 @@ themselves.
 
 The files in the `rr__` folders are symbolic links to files in the Nextflow
 work directory. **Don't delete the work directory** while you still need
-these results. Copy them (for example with `cp -rL`) if you want to keep
-them independently of the work directory.
+these results. To free up space while keeping `-resume`, see
+[Cleaning up old runs](cleaning-data.md). To make the results independent
+of the work directory at the end of a project, see
+[Finalizing results](finalizing-results.md).
 
 ## Monitoring progress
 
