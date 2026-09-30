@@ -50,13 +50,13 @@ explanation, and a sidebar listing the parameters that were used.
 | Tab | Shown when |
 |---|---|
 | 1. General QC | Always. |
-| Well QC | The per-well QC table was built (normally always). Shown directly after General QC. |
-| 2. Registration | The measurements contain registration correlation columns, i.e. a registration manifest was used. |
-| 3. Flatfields | `ff_run = true`. |
-| 4. Deconvolution | `dc_run = true`. |
-| 5. Intensities | The per-cell intensity statistics are available (normally always). |
-| 6. Scaling factors | `sc_autoscale = true`. Manual scaling does not produce this tab. |
-| 7. Debris | The per-image debris metrics are available (normally always). |
+| 2. Well QC | The per-well QC table was built (normally always). Shown directly after General QC. |
+| 3. Registration | The measurements contain registration correlation columns, i.e. a registration manifest was used. |
+| 4. Flatfields | `ff_run = true`. |
+| 5. Deconvolution | `dc_run = true`. |
+| 6. Intensities | The per-cell intensity statistics are available (normally always). |
+| 7. Scaling factors | `sc_autoscale = true`. Manual scaling does not produce this tab. |
+| 8. Debris | The per-image debris metrics are available (normally always). |
 
 ### Tab 1: General QC
 
@@ -70,7 +70,7 @@ Below it is a heatmap of cells per well for each plate. Empty or
 blacklisted wells stand out as gaps. The plate layout is inferred from the
 data, or set with `qc_plate_format` (`24`, `96`, `384` or `1536`).
 
-### Well QC
+### Tab 2: Well QC
 
 The [per-well QC table](#per-well-qc-table) as a sortable table, with the
 number of failed, warned, passed and blacklisted wells above it. Failed and
@@ -78,7 +78,7 @@ warned wells are listed first, and a filter shows only the wells with a given
 verdict. The table in the report is for browsing; filter on `well_qc.tsv` in
 downstream analysis.
 
-### Tab 2: Registration
+### Tab 3: Registration
 
 How well the cycles align. For every cell, the pipeline calculates the
 correlation between the registration channels of the reference and query cycles
@@ -105,7 +105,7 @@ percentage, or whole fields that fail to align, point to a registration
 problem. See [Understanding output](understanding-output.md#registration)
 for examples.
 
-### Tab 3: Flatfields
+### Tab 4: Flatfields
 
 For each channel, the fitted flatfield and an evaluation plot. With global
 flatfields, identical models are shown once. With multiple cycles, channels
@@ -113,7 +113,7 @@ are labelled by cycle and channel. See
 [Understanding output](understanding-output.md#flatfield-estimation) for how
 to read the plots. The darkfield is not fitted and is always uniform.
 
-### Tab 4: Deconvolution
+### Tab 5: Deconvolution
 
 Before and after deconvolution images for each channel, from the
 `qc_n_sample_decon` (default 10) most cell-dense fields, one field per well
@@ -122,7 +122,7 @@ dense fields, and is often too subtle to see in a full-field thumbnail, so the
 images are centre-cropped to `qc_decon_crop_pct` (default 25) percent of the
 width and height. Set it to `100` to show the full field.
 
-### Tab 5: Intensities
+### Tab 6: Intensities
 
 Unscaled per-cell intensities for registered cells. Pick a channel and a
 statistic (min, 25th percentile, median, 75th percentile, mean or max; median
@@ -130,7 +130,7 @@ by default). The tab shows a heatmap per plate of the well mean, on a colour
 scale shared by all plates, and a histogram of the per-cell values. Use it to
 spot plate effects, edge effects and wells with unusual staining.
 
-### Tab 6: Scaling factors
+### Tab 7: Scaling factors
 
 Only shown with automatic scaling. It contains:
 
@@ -143,7 +143,7 @@ Only shown with automatic scaling. It contains:
 When consensus scaling across batches is used, the consensus values are
 shown. See [Scaling](scaling.md) for what these values mean.
 
-### Tab 7: Debris
+### Tab 8: Debris
 
 Debris is bright material outside the cells, such as dye aggregates or
 dead-cell fragments. It can inflate a channel's measured background and
