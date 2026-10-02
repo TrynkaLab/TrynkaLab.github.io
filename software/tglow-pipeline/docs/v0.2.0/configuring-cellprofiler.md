@@ -142,6 +142,16 @@ objects as the starting point of your analysis, instead of segmenting again
 in CellProfiler. Makse sure to use RelateObjects to parent nuclei to their cell.
 See the note below. 
 
+::: warning FilterObjects renumbers objects
+The numbering is only kept until objects are filtered. **FilterObjects**
+renumbers the objects it keeps to run from 1 up to the number of objects
+left, so after filtering, an object's number no longer matches its Cellpose
+label. For example, if cell 2 of `cell_raw` is removed, cell 3 becomes cell 2
+in `cell`. The original number is kept in the `Parent_cell_raw` column of the
+filtered object. Use that column, not `ObjectNumber`, to match cells back to
+the masks.
+:::
+
 ## Objects and export for the aggregation step
 
 After CellProfiler, the pipeline combines the output of all wells into one
@@ -197,6 +207,8 @@ RelateObjects           parent cell, child cyto
 Measure...              your measurements on cell, nucl and cyto
 ExportToSpreadsheet     Image, cell, nucl, cyto
 ```
+
+For optimal compatibility with tglow-r use object name 'cell' for the main object, and 'nucl' for nucleus, 'cyto' for cytoplasm, 'memb' for membrane, 'mito' for individually segmented mitochondria and 'mitoNetwork' for the single fused segmantation of mitochondria. This ensures redundant features like their counts (always 1 per cell for some of these) are dropped by default.  
 
 ## Building and testing your pipeline
 

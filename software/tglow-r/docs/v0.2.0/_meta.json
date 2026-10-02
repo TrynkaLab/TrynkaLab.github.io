@@ -1,0 +1,12 @@
+[
+  { "type": "file", "name": "index", "label": "Home" },
+  { "type": "file", "name": "installation", "label": "Installation" },
+  { "type": "file", "name": "introduction-to-tglowdataset", "label": "Introduction to TglowDataset" },
+  { "type": "file", "name": "operations-on-tglowdataset", "label": "Operations on TglowDataset" },
+  { "type": "file", "name": "quality-control-and-hard-filters", "label": "Quality control and hard filters" },
+  { "type": "file", "name": "feature-transformation-and-scaling", "label": "Feature transformation and scaling" },
+  { "type": "file", "name": "dimensionality-reduction-and-clustering", "label": "Dimensionality reduction and clustering" },
+  { "type": "file", "name": "modelling-and-residuals", "label": "Modelling and residuals" },
+  { "type": "file", "name": "differential-abundance-with-milo", "label": "Differential abundance with Milo" },
+  { "type": "file", "name": "source", "label": "Source snapshot" }
+]

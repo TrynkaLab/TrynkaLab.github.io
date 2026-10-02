@@ -35,7 +35,8 @@ const software: Record<SoftwareSlug, SoftwarePackage> = {
     title: 'tglow-r',
     description: 'R package for downstream analysis of tglow-pipeline outputs',
     repository: 'https://github.com/TrynkaLab/tglow-r',
-    currentVersion: 'v0.1.22',
+    currentVersion: 'v0.2.0',
+    versions: ['v0.2.0', 'v0.1.22'],
   },
   'tglow-core': {
     title: 'tglow-core',
