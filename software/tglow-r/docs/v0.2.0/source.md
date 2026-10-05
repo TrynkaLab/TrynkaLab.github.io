@@ -2,7 +2,7 @@
 
 - Documentation version: `v0.2.0`
 - Repository: [TrynkaLab/tglow-r](https://github.com/TrynkaLab/tglow-r)
-- Checked against: tglow-r `v0.1.23`, commit `e9fef16`
+- Checked against: tglow-r `v0.1.23`, commit `cfa01bc`
 - Snapshot checked: 2026-10-02
 
 The pages in this version started as a copy of the v0.1.22 documentation (a

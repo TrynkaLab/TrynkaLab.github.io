@@ -126,16 +126,13 @@ res$model.stats   # r2_cond, r2_marg, singular_reff
 
 Instead of using the pvalues from `lmerTest::lmer()` its also possible to perform a likelihood ratio test by setting `formula.null`. It is passed through `...` to `lmm_matrix()`. The LRT results are added to `model.stats` (`lrt_chisqr`, `lrt_p-value`, `lrt_df`, plus `r2_cond_null`, `r2_marg_null` and `singular_reff_null` for the null model), next to the lmerTest p-values in `pval`.
 
-::: warning Use refit=TRUE when testing fixed effects
-`refit` defaults to `FALSE`, which compares the REML fits. REML likelihoods are not comparable between models with different fixed effects, so the test is not valid in that case (on `tglow_example` it returns a chi-square of 0 and a p-value of 1). Set `refit=TRUE` to refit both models with maximum likelihood when the null model drops fixed effects.
-:::
+`refit` defaults to `TRUE`, so both models are refit with maximum likelihood before they are compared. This is needed when the null model drops fixed effects, because REML likelihoods are not comparable between models with different fixed effects. `refit=FALSE` compares the REML fits, which is only valid when both models have the same fixed effects and differ in their random effects.
 
 ```r
 res <- calculate_lmm(tglow.sub, assay="raw", slot="scale.data",
                      covariates=c("drug", "well"),
                      formula="~ drug + (1|well)",
-                     formula.null="~ (1|well)",
-                     refit=TRUE)
+                     formula.null="~ (1|well)")
 
 res$model.stats[, c("lrt_chisqr", "lrt_p-value", "lrt_df")]
 ```
