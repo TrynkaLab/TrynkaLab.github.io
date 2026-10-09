@@ -195,6 +195,13 @@ when its inputs or parameters change. After re-running a cached step, such
 as the flatfields above, the downstream `rr__` results update by
 themselves.
 
+The `lsf` and `lsf_ignore_errors` profiles set Nextflow's `cache = 'lenient'`,
+which decides whether a task can be reused from the paths and sizes of its
+input files, ignoring their modification times. On shared file systems such
+as Lustre, timestamps can change without the content changing, which would
+otherwise make tasks re-run unexpectedly. Consider the same setting in your
+own profile on such file systems.
+
 The files in the `rr__` folders are symbolic links to files in the Nextflow
 work directory. **Don't delete the work directory** while you still need
 these results. To free up space while keeping `-resume`, see

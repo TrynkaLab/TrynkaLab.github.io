@@ -77,7 +77,7 @@ pipeline drops cells whose registration correlation is below
 `sc_registration_thresh` (default 0.4) on any registration column (the
 columns whose name contains `sc_registration_pattern`, by default
 `registration_corr`). Cells without a correlation value are dropped as well.
-The same filter is used in the [QC report](qc-report.md#tab-2-registration).
+The same filter is used in the [QC report](qc-report.md#tab-3-registration).
 
 ### Dynamic range
 
@@ -167,13 +167,19 @@ full factor, and there is a smooth transition in between.
 The sigmoid is fitted per plate and channel on the images of the control
 wells, in raw intensity units:
 
-- The lower point is the 95th percentile of `sigmoid_lower_feature` over the
-  control images, for example `background_q75`, the upper quartile of the
-  pixels outside cells ("the top of the background").
-- The upper point is the median of `sigmoid_upper_feature`, for example
-  `otsu_log`, an Otsu threshold on log-transformed pixels ("where signal
-  starts"). On skewed fluorescence intensities, `otsu_log` is more robust
-  than plain `otsu`.
+- The lower point is the `sigmoid_lower_quantile` quantile of
+  `sigmoid_lower_feature` over the control images. For example, `0.95` of
+  `background_q75`, the upper quartile of the pixels outside cells, gives
+  "the top of the background" in nearly every control image.
+- The upper point is the `sigmoid_upper_quantile` quantile of
+  `sigmoid_upper_feature`. For example, `0.5` (the median) of `otsu_log`, an
+  Otsu threshold on log-transformed pixels, gives "where signal starts". On
+  skewed fluorescence intensities, `otsu_log` is more robust than plain
+  `otsu`.
+
+A higher lower quantile protects more of the background from scaling; a
+lower upper quantile applies the full factor from a lower intensity. Before
+v0.2.0 the quantiles were fixed at `0.95` and `0.5`.
 
 The sigmoid is set so its weight is almost 0 (0.001) at the lower point and
 almost 1 (0.999) at the upper point. The resulting slope and bias are
@@ -188,9 +194,14 @@ pixel = pixel / (w × (scale_factor - 1) + 1)
 
 The result is rounded and clipped to 0 to 65535.
 
-A plate without a fitted sigmoid (for example because it has no control
-wells) gets the average slope and bias of the other plates, with a warning.
-Set `sc_skip_sigmoid = true` to apply the factors uniformly to all pixels.
+If the upper point is not above the lower point, the background sits at or
+above the signal and the sigmoid would be inverted. Such a fit is rejected
+with a `sigmoid_inverted` warning. A plate whose sigmoid was rejected, or
+that has no fit at all (for example because it has no control wells, a
+`sigmoid_filled_from_mean` warning), gets the average slope and bias of the
+channel's other plates. If no plate of a channel has a usable fit, the
+channel is scaled without a sigmoid. Set `sc_skip_sigmoid = true` to apply
+the factors uniformly to all pixels.
 
 #### Borrowing a sigmoid
 
@@ -214,8 +225,9 @@ for an image when that image's debris detection is reliable:
 `threshold_mean_ratio` is at least `sc_debris_min_ratio` (default 2) and
 `debris_percentage` is at most `sc_debris_max_pct` (default 10). Otherwise
 the plain feature is used. Set `sc_skip_debris_removal = true` to always
-use the plain features. The debris metrics are explained in the
-[QC report](qc-report.md#tab-7-debris).
+use the plain features. How debris is detected is set by `sc_debris_method`
+(default `Otsu_log`) and `sc_cellmask_expansion` (default 0). The debris metrics are explained in the
+[QC report](qc-report.md#tab-8-debris).
 
 ### Per-channel opt-outs
 
@@ -240,6 +252,7 @@ Automatic scaling writes to `rr__scaling/` in `rn_publish_dir`:
 | `scaling_factors.txt` | The factors, one line of `<plate>_ch<channel>=<factor>` entries. |
 | `sigmoid_slope.txt`, `sigmoid_bias.txt` | The fitted sigmoids, in the same format. |
 | `scaling_index.tsv` | One row per plate and channel with every intermediate value, see below. |
+| `sigmoid_inputs.tsv` | For every channel that fits a sigmoid, the `sigmoid_lower_feature` and `sigmoid_upper_feature` values of each control image (`plate`, `channel`, `well`, `field`, `lower`, `upper`), which the sigmoid's lower and upper points are quantiles of. |
 | `scaling_warnings.tsv` | Warnings raised while calculating the factors (`source`, `category`, `channel`, `message`). Also shown in the QC report. |
 | `config/` | Your original channel map, the resolved `updated_channel_map.tsv`, and the mask settings used for intensity measurement. |
 | `consensus/` | With `sc_reference_scaling_index`: the consensus versions of the files above plus `consensus_diagnostics.tsv`. These replace the files in `rr__scaling/`. |
@@ -262,17 +275,18 @@ and the rescaled images in `rr__processed_images/scaled/`. See
 
 ## Checking the result
 
-The [QC report](qc-report.md#tab-6-scaling-factors) shows the factors, sigmoids and
+The [QC report](qc-report.md#tab-7-scaling-factors) shows the factors, sigmoids and
 warnings. Things to look for:
 
 - **Warnings**, for example control wells dropped for having too few
-  cells, or plates without a fitted sigmoid.
+  cells, or plates with an inverted or missing sigmoid.
 - **Factors that differ a lot between plates** of the same channel. These come
   from large plate offsets. Check that the control wells of those plates
   really are comparable.
 - **Sigmoids** that start too high (background above the transition, so the
-  background is scaled) or too low. Compare them with the intensity
-  distributions in Tab 5.
+  background is scaled) or too low. The sigmoid plots show the background and
+  signal distributions of the control images behind each curve; also compare
+  with the intensity distributions in Tab 6.
 
 ## Scaling across batches
 
@@ -365,6 +379,8 @@ images are not copied to `rr__processed_images/unscaled/`.
 | `sc_skip_debris_removal` | `false` | Never use the debris-removed (`_dbrm`) features. |
 | `sc_debris_min_ratio` | `2` | Minimum `threshold_mean_ratio` to use the `_dbrm` features. |
 | `sc_debris_max_pct` | `10.0` | Maximum `debris_percentage` to use the `_dbrm` features. |
+| `sc_debris_method` | `Otsu_log` | Threshold used to call debris: `MCE`, `Otsu`, `Otsu_log` or a percentile such as `Q99`. |
+| `sc_cellmask_expansion` | `0` | Pixels to expand the cell mask by before calling debris. |
 | `sc_reference_scaling_index` | | Earlier batches' `scaling_index.tsv` files for consensus scaling. |
 | `rn_stop_after_scaling_factors` | `false` | Stop after the scaling factors are calculated. |
 | `sc_manualscale` | | Manual scaling factors file. |

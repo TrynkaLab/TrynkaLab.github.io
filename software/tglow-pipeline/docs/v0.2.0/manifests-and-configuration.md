@@ -154,6 +154,8 @@ the cell mask, and automatic scaling uses dynamic-range scaling only.
 | `plate_offset_feature` | | Statistic compared between plates' control wells to estimate plate offsets, for example `mean`. |
 | `sigmoid_lower_feature` | | Statistic marking the top of the background, for example `background_q75`. |
 | `sigmoid_upper_feature` | | Statistic marking where signal starts, for example `otsu_log`. |
+| `sigmoid_lower_quantile` | yes | Quantile (0 to 1) of `sigmoid_lower_feature` over a plate's control images that sets the sigmoid's lower point, for example `0.95`. Can be blank on rows that don't fit a sigmoid. |
+| `sigmoid_upper_quantile` | yes | Quantile (0 to 1) of `sigmoid_upper_feature` over a plate's control images that sets the sigmoid's upper point, for example `0.5` (the median). Can be blank on rows that don't fit a sigmoid. |
 | `control_population` | | Regular expression matched against the whole `control_type` in the control list, for example `negctrl` or `negctrl\|posctrl`. Blank uses all control wells. |
 | `measure_in` | | `cell` (default) or `nucleus`: which mask the channel's intensities are measured in. |
 | `sigmoid_from_channel` | | `name` of another row whose fitted sigmoid this channel reuses. |
@@ -165,15 +167,21 @@ To point at another channel's feature on purpose, write the full column name
 (`ch0__background_mean`). Leaving a feature blank opts the channel out of that
 step.
 
+The two `sigmoid_*_quantile` columns must be present, but only need a value
+on rows that fit a sigmoid (`sigmoid_lower_feature` set and `skip_sigmoid` not
+`true`). The pipeline checks at startup that they are numbers between 0 and
+1, so write `0.95`, not `95`. Use `0.95` and `0.5` to get the behaviour of
+earlier versions, where these were fixed. See [Sigmoid soft threshold](scaling.md#sigmoid-soft-threshold).
+
 Example (`channel_map.tsv`):
 
 ```text
-cycle	channel	name	dynamic_range_feature	plate_offset_feature	sigmoid_lower_feature	sigmoid_upper_feature	control_population	measure_in	sigmoid_from_channel
-1	1	GFP	max	mean	background_q75	otsu_log	negctrl	cell
-1	0	DAPI	max	mean	background_q75	otsu_log	negctrl	cell
-1	0:in	DAPI_nuclear	max	mean			negctrl	nucleus	DAPI
-1	0:ex	DAPI_cytoplasmic	max	mean			negctrl	cell	DAPI
-2	1	GFP_cycle2	max	mean	background_q75	otsu_log	negctrl	cell
+cycle	channel	name	dynamic_range_feature	plate_offset_feature	sigmoid_lower_feature	sigmoid_upper_feature	sigmoid_lower_quantile	sigmoid_upper_quantile	control_population	measure_in	sigmoid_from_channel
+1	1	GFP	max	mean	background_q75	otsu_log	0.95	0.5	negctrl	cell
+1	0	DAPI	max	mean	background_q75	otsu_log	0.95	0.5	negctrl	cell
+1	0:in	DAPI_nuclear	max	mean					negctrl	nucleus	DAPI
+1	0:ex	DAPI_cytoplasmic	max	mean					negctrl	cell	DAPI
+2	1	GFP_cycle2	max	mean	background_q75	otsu_log	0.95	0.5	negctrl	cell
 ```
 
 Cycles must be numbered consecutively from 1, and each `name` must be
@@ -268,11 +276,14 @@ re-running them:
 3. **Update the channel map.** Rename the `plate` column to `cycle` and
    replace each plate name with its cycle number. Shorten the `*_feature`
    values to the statistic only (for example `ch2__max` becomes `max`),
-   unless you mean to point at another channel's feature.
+   unless you mean to point at another channel's feature. Add the
+   `sigmoid_lower_quantile` and `sigmoid_upper_quantile` columns, set to
+   `0.95` and `0.5` on every row that fits a sigmoid, to reproduce the
+   previous results.
 4. **Rename parameters.** `bp_*` is now `ff_*`, `tg_conda_env`/`tg_container`
    are `rn_conda_env`/`rn_container`, and scaling parameters now use `sc_`
    (for example `rn_manualscale` is `sc_manualscale`). `cp_cell_power`,
-   `cp_nucl_power`, `rn_dummy_mode`, `rn_threshold`, `cp_dont_postprocess`
+   `cp_nucl_power`, `rn_dummy_mode`, `rn_threshold`, `cp_dont_post_process`
    and all subcell parameters were removed. The pipeline will report any
    leftover names at startup.
 5. **Select the workflow with `--workflow`** instead of `-entry`, and use

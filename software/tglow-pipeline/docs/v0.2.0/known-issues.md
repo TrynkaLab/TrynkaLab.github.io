@@ -63,6 +63,8 @@ Flatfields are hard to estimate from sparse images. For sparse datasets:
 - Fit one flatfield across all plates of a cycle with `ff_global_flatfield = true`.
 - Use the default polynomial mode (`ff_mode = "POLY"`). BaSiCPy
   (`ff_mode = "BASICPY"`) works best on dense images such as tissue sections.
+- If bright debris pulls the fit, summarise the bins with
+  `ff_bin_stat = "median"` or `"trimmed"` instead of the default `"mean"`.
 
 See [Understanding output](understanding-output.md#flatfield-estimation) for
 how to judge the fits.

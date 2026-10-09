@@ -69,7 +69,11 @@ are also `model_evaluation_thresh_<x>_...` plots on the thresholded images.
 
 ![model_evaluation_thresh_1_nimg_4_nbin_20.png](./images/model_evaluation_thresh_1_nimg_4_nbin_20.png)
 
-The flatfields also appear in the [QC report](qc-report.md#tab-3-flatfields).
+In POLY mode with binned fitting (the default, see [POLY](#poly)),
+`binned_fit.png` compares the per-bin values the polynomial was fitted on
+with the fitted surface at those bins.
+
+The flatfields also appear in the [QC report](qc-report.md#tab-4-flatfields).
 
 ### Modes
 
@@ -92,6 +96,26 @@ which is the same approach Revity uses in Harmony:
 Set `ff_degree` to fit a simpler or more complex full polynomial of that
 degree. We recommend a degree between 2 and 4. `ff_use_ridge = true` fits
 with cross-validated ridge regression instead of ordinary least squares.
+
+The polynomial is not fitted on every pixel. The training images are divided
+into square bins of `ff_bin_size` pixels (default 20, which must evenly
+divide the image size), and the pixels of all training images that fall in
+a bin are pooled into one value, set by `ff_bin_stat`:
+
+- **`mean`** (default): the smoothest fit.
+- **`median`**: ignores bright outliers such as debris, but is noisier.
+- **`trimmed`**: the mean after dropping `ff_bin_trim` (default 0.1) from
+  each end, in between the two.
+- **`none`**: the behaviour before v0.2.0, fitting on 4×4 block means of
+  every image.
+
+Every bin then counts equally in the fit, however many images contribute
+foreground there. In our testing this gave a closer fit to the true
+flatfield, and it uses far less memory. With `ff_threshold = true`, only
+foreground pixels are pooled. Bins with fewer than `ff_bin_min_pixels`
+(default 50) pooled pixels over all images are left out of the fit; if many
+bins are dropped, use more images, a larger `ff_bin_size` or a lower
+`ff_bin_min_pixels`.
 
 #### PE
 
@@ -131,8 +155,17 @@ good fit (`ff_nimg`, default 200). In sparse images, the background can
 dominate the fit, while the flatfield of the foreground signal is what
 matters. Options:
 
-- `ff_threshold = true` fits only on the foreground: the images are
-  thresholded (multi-Otsu) and the two brightest tiers are used.
+- `ff_threshold = true` fits only on the foreground pixels. The threshold is
+  set by `ff_threshold_mode`, for POLY fitting and for the evaluation images:
+  - **`otsu_log`** (default): an Otsu threshold on log-transformed
+    intensities, the same method as the debris detection
+    (`sc_debris_method = "Otsu_log"`).
+  - **`otsu`**: a two-class Otsu threshold divided by 4, the behaviour before
+    v0.2.0. It is more lenient, but lets much of the background through
+    when the signal is dim.
+
+  In BASICPY mode, a plain Otsu mask is passed to BaSiCPy as fitting
+  weights instead.
 - `ff_merge_n` combines several images into one by max projection, to
   artificially increase the density of foreground signal. This can give
   more stable flatfields for very sparse images. `ff_pseudoreplicates` does
@@ -168,7 +201,7 @@ evaluation. It does lose some dynamic range at low intensities. You can set
 `dc_clip_max = 65535` to keep the full dynamic range, at the risk of clipping
 if the input images were already close to the maximum intensity.
 
-Compare before and after images in the [QC report](qc-report.md#tab-4-deconvolution).
+Compare before and after images in the [QC report](qc-report.md#tab-5-deconvolution).
 
 ## Segmentation
 
@@ -245,7 +278,7 @@ measures the correlation of the registration channels within each cell
 (`ch<ref>_ch<query>__registration_corr` in the measurements, one column per
 query cycle). Cells below
 `sc_registration_thresh` are excluded from scaling, and the QC report shows
-the worst and best aligning fields (see [QC report](qc-report.md#tab-2-registration)).
+the worst and best aligning fields (see [QC report](qc-report.md#tab-3-registration)).
 Use the same correlation to filter cells in downstream analysis.
 
 ## Processed images
@@ -298,13 +331,21 @@ written per well to
 `rr__features/measurements/<unscaled or scaled>/<plate>/<row>/<col>/`:
 
 - `object_features.parquet`: one row per cell, with columns `ch<N>__<stat>`
-  (`min`, `q25`, `median`, `q75`, `mean`, `max`, ...) for every final channel,
+  (`min`, `q5`, `q25`, `median`, `q75`, `q95`, `mean`, `max`) for every final channel,
   measured in the cell or nucleus mask as set by the
-  [channel map](manifests-and-configuration.md#channel-map). For multi-cycle
-  runs it also has the registration correlation of each cell.
+  [channel map](manifests-and-configuration.md#channel-map). It also has
+  each cell's position (`centroid_x`, `centroid_y`, `centroid_z`) and `area`,
+  and for multi-cycle runs the registration correlation of each cell.
 - `image_features.parquet`: one row per field, with background statistics
   (the pixels outside cells), thresholds, debris metrics and their
-  debris-removed (`_dbrm`) variants.
+  debris-removed (`_dbrm`) variants. How debris is called is set by
+  `sc_debris_method` and `sc_cellmask_expansion`, see
+  [QC report](qc-report.md#tab-8-debris).
+
+In 3D mode, the statistics are computed over all voxels of the stack rather
+than a projection, so scaling factors are fitted on the same intensities that
+rescaling is applied to. `area` is then a voxel count and `centroid_z` the
+cell's z position; for 2D input `centroid_z` is 0.
 
 ## Features
 
@@ -350,13 +391,23 @@ processed images (the scaled images when scaling is enabled). In
 
 - `<field>.h5`: an HDF5 file per field, with one group per cell. The masks
   are appended as the last channels.
-- `<well>.parquet`: metadata for every cell of the well: its index in the
-  HDF5 file, position, intensities, registration correlation and so on.
 
-`rr__cellcrops/cellcrop_index.parquet` combines the metadata of all wells,
-so you can easily index the crops from tglow-r or when sampling cells to
-train deep learning models. Fields with more than `rn_max_per_field` (default
-1000) cells are skipped.
+`rr__cellcrops/cellcrop_index.parquet` holds the metadata of every cell in
+the run: its index in the HDF5 file, position, crop size, intensities,
+registration correlation and so on. Use it to index the crops from tglow-r or
+when sampling cells to train deep learning models. (The per-well metadata
+files it is built from stay in the work directory and are not published.)
+
+Each crop is a square centred on the cell's centre of mass, just large enough
+to contain every pixel of the cell, so irregular cells get larger crops. Its
+side length is stored as `diameter`. Cells whose crop would extend past the
+edge of the field are skipped, as are fields with more than
+`rn_max_per_field` (default 1000) cells.
+
+For multi-cycle runs, `corr_<ref>_<query>` is the correlation between the
+reference and query registration channels within the cell's nucleus (or the
+whole cell, if there is no nucleus mask), comparable to CellProfiler's
+per-object Pearson correlation.
 
 ## QC report
 

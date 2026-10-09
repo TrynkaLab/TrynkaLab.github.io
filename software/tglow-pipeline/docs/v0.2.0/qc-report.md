@@ -138,7 +138,12 @@ Only shown with automatic scaling. It contains:
   factors, including those from consensus scaling. Warnings are also written
   to `scaling_warnings.tsv`.
 - A bar plot of the scale factor for every channel and plate.
-- The fitted sigmoid for every channel, one curve per plate.
+- The fitted sigmoid for every channel, one curve per plate. Behind each
+  curve, the per-image values of `sigmoid_lower_feature` and
+  `sigmoid_upper_feature` over the plate's control images are drawn as
+  densities (scaled to a peak of 1), with the chosen lower and upper points
+  marked. A good sigmoid sits between the background and signal
+  distributions. The values are also written to `sigmoid_inputs.tsv`.
 
 When consensus scaling across batches is used, the consensus values are
 shown. See [Scaling](scaling.md) for what these values mean.
@@ -150,7 +155,11 @@ dead-cell fragments. It can inflate a channel's measured background and
 signal. For every image and channel, the pipeline takes the pixels outside the
 cell masks and calculates:
 
-- A threshold on those pixels (Otsu on log-transformed values by default).
+- A threshold on those pixels, set by `sc_debris_method`: `Otsu_log` (Otsu
+  on log-transformed values, the default), `Otsu`, `MCE` (minimum cross
+  entropy) or a percentile such as `Q99`. The cell mask can first be
+  expanded by `sc_cellmask_expansion` pixels (default 0), so signal right at
+  the cell edge isn't counted as debris.
 - `threshold_mean_ratio`: the threshold divided by the mean of those pixels.
   In an image with only background, the threshold lands close to the mean and
   the ratio is low. A high ratio means bright objects are present.
@@ -169,7 +178,9 @@ debris percentage with both thresholds marked, and galleries of example
 images for each class with the debris outlined in red. The galleries show
 `qc_n_sample_debris` (default 10) images per channel and class: the
 highest-ratio images for "no debris" and the highest-percentage images for the
-other two classes.
+other two classes. In 3D mode, the overlays show a max projection, outlining
+debris found in any plane, so the outlined area can look larger than
+`debris_percentage` suggests.
 
 The same thresholds decide which images get a debris-removed feature during
 scaling, see [Scaling](scaling.md#debris-aware-fitting).
@@ -201,7 +212,7 @@ The checks:
 | Low signal | warn when more than `qc_max_pct_low_signal` (default 25) percent of cells have low signal in any checked channel | `qc_signal_stat`, `qc_min_signal_ratio`, `qc_max_pct_low_signal`, `qc_intensity_skip_channels` |
 
 A cell has low signal in a channel when its `qc_signal_stat` (default
-`median`) is below `qc_min_signal_ratio` (default 1.5) times the background of
+`q95`, the 95th percentile of the cell's pixels) is below `qc_min_signal_ratio` (default 1.5) times the background of
 its own field. The comparison is per field because background varies from
 field to field. The low-signal check only warns, never fails, because a dim
 channel is often real, for example a marker that is absent in that well.
@@ -240,9 +251,10 @@ analysis. The pipeline itself does not drop wells based on it.
 | `qc_min_pct_registered` | `25` | Fail wells with a lower percentage of registered cells. |
 | `qc_min_signal_ratio` | `1.5` | Low-signal cutoff, as a multiple of the field background. |
 | `qc_max_pct_low_signal` | `25` | Warn when a higher percentage of cells has low signal. |
-| `qc_signal_stat` | `median` | Per-cell statistic used for the low-signal check. |
+| `qc_signal_stat` | `q95` | Per-cell statistic used for the low-signal check. |
 | `qc_intensity_skip_channels` | | Final channels excluded from the low-signal check. |
 
 The report also uses `sc_registration_thresh`, `sc_registration_pattern`,
-`sc_debris_max_pct` and `sc_debris_min_ratio`, which are described under
+`sc_debris_max_pct`, `sc_debris_min_ratio`, `sc_debris_method` and
+`sc_cellmask_expansion`, which are described under
 [Scaling](scaling.md#parameters).
