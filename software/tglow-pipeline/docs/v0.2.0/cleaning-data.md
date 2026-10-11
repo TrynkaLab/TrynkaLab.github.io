@@ -6,6 +6,8 @@ it belongs to runs you no longer need, and it can take up a lot of space and fil
 `nextflow clean` removes the work directories of old runs, while keeping
 what the latest run needs, so you can still continue with `-resume`.
 
+> Due to a bug/feature, `nextflow clean` can break caching for jobs that were restarted, so those tasks run again on the next `-resume`. The results folder is kept intact. Because of this, only clean up when you are pretty sure you don't need to run more experiments, or when a major cleanup is needed, rather than after every run.
+
 ## What is safe to remove
 
 The pipeline stores its results in two ways (see
@@ -19,7 +21,7 @@ The pipeline stores its results in two ways (see
   are gone.
 
 So clean up only runs whose `rr__` results you no longer need. In practice,
-that means keeping the latest successful run and removing the rest.
+that means keeping the latest successful run and removing the rest. Do keep in mind while the results folder will be correct, the caching behaviour might be affected due to the bug noted above. 
 
 ## Keeping the latest successful run
 
